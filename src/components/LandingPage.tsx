@@ -28,10 +28,19 @@ function LandingPage({ theme, onSetMode, onInversion, onBlueLight, onNavigate }:
     useEffect(() => {
         if (typeof gsap === "undefined" || !heroRef.current) return;
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-        const tween = gsap.from(heroRef.current.children, {
+        const children = heroRef.current.children;
+        const tween = gsap.from(children, {
             y: 30, opacity: 0, duration: 0.8, stagger: 0.12, ease: "power3.out",
         });
-        return () => tween.kill();
+        return () => {
+            tween.kill();
+            // CRITICAL: clear the inline styles GSAP applied (opacity:0, transform).
+            // Without this, React StrictMode's double-fire in dev mode kills the
+            // first tween mid-animation, leaving elements stuck at opacity:0.
+            // The second gsap.from() then reads that as the "natural" target
+            // and animates FROM 0 TO 0 — text stays invisible.
+            gsap.set(children, { clearProps: "opacity,y,transform" });
+        };
     }, []);
 
     // Pass mode > 50 to the 3D bg as a "darker palette" hint
