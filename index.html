@@ -17,48 +17,61 @@
 
   <style>
     /* =====================================================================
-       DESIGN TOKENS — derived directly from the research report
-       Anchors: official Frontend Mentor neutrals
-       Brand family: sampled from official hero asset (#4743a0 → #5e83ee)
-       Body text uses #767676 (clears 4.5:1) instead of official #969696 (2.96:1)
+       SMOOTH MODE INTERPOLATION VIA color-mix()
+       --mode (0-100) is set on documentElement by App.tsx as a percentage.
+       Each color token is computed as a color-mix between its light and dark
+       endpoints, weighted by --mode. The browser interpolates colors smoothly
+       — moving the slider produces a continuous gradient transition with no
+       visible "snap" between modes.
+
+       color-mix() is supported in Chrome 111+, Firefox 113+, Safari 16.2+
+       (all evergreen). MDN: developer.mozilla.org/en-US/docs/Web/CSS/color_value/color-mix
     ===================================================================== */
     :root {
-      --ink-900: #2b2b2b;
-      --ink-700: #535353;
-      --ink-600: #767676;
-      --ink-500: #949494;
-      --surface-0: #ffffff;
-      --surface-1: #eef2f8;
-      --brand-700: #4743a0;
-      --brand-600: #5262c6;
-      --brand-500: #5e83ee;
+      --mode: 0%;
+
+      /* Light → dark endpoint pairs */
+      --ink-900-light: #2b2b2b;
+      --ink-900-dark: #f1f5f9;
+      --ink-700-light: #535353;
+      --ink-700-dark: #cbd5e1;
+      --ink-600-light: #767676;
+      --ink-600-dark: #94a3b8;
+      --ink-500-light: #949494;
+      --ink-500-dark: #64748b;
+      --surface-0-light: #ffffff;
+      --surface-0-dark: #1a1a2e;
+      --surface-1-light: #eef2f8;
+      --surface-1-dark: #1a1a2e;
+      --brand-700-light: #4743a0;
+      --brand-700-dark: #818cf8;
+      --brand-600-light: #5262c6;
+      --brand-600-dark: #a5b4fc;
+      --brand-500-light: #5e83ee;
+      --brand-500-dark: #c4b5fd;
+
+      /* Mixed values — re-evaluated whenever --mode changes */
+      --ink-900: color-mix(in srgb, var(--ink-900-light), var(--ink-900-dark) var(--mode));
+      --ink-700: color-mix(in srgb, var(--ink-700-light), var(--ink-700-dark) var(--mode));
+      --ink-600: color-mix(in srgb, var(--ink-600-light), var(--ink-600-dark) var(--mode));
+      --ink-500: color-mix(in srgb, var(--ink-500-light), var(--ink-500-dark) var(--mode));
+      --surface-0: color-mix(in srgb, var(--surface-0-light), var(--surface-0-dark) var(--mode));
+      --surface-1: color-mix(in srgb, var(--surface-1-light), var(--surface-1-dark) var(--mode));
+      --brand-700: color-mix(in srgb, var(--brand-700-light), var(--brand-700-dark) var(--mode));
+      --brand-600: color-mix(in srgb, var(--brand-600-light), var(--brand-600-dark) var(--mode));
+      --brand-500: color-mix(in srgb, var(--brand-500-light), var(--brand-500-dark) var(--mode));
+
       --focus-ring: var(--brand-600);
       --danger: #ef4444;
-      --shadow-panel: 0 18px 40px rgb(43 43 43 / 0.16);
-      --neu-out: 10px 10px 24px rgb(163 177 198 / 0.45), -8px -8px 20px rgb(255 255 255 / 0.95);
-      --neu-in: inset 4px 4px 8px rgb(163 177 198 / 0.5), inset -3px -3px 6px rgb(255 255 255 / 0.9);
-      --neu-soft: 6px 6px 14px rgb(163 177 198 / 0.45), -4px -4px 12px rgb(255 255 255 / 0.95);
-      --map-tap-shadow: 0 8px 24px rgb(82 98 198 / 0.35);
+
+      /* Neumorphic shadows — these mix between light/dark variants too */
+      --neu-shadow-dark: color-mix(in srgb, rgba(163, 177, 198, 0.45), rgba(0, 0, 0, 0.55) var(--mode));
+      --neu-shadow-light: color-mix(in srgb, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.04) var(--mode));
+      --neu-out: 10px 10px 24px var(--neu-shadow-dark), -8px -8px 20px var(--neu-shadow-light);
+      --neu-soft: 6px 6px 14px var(--neu-shadow-dark), -4px -4px 12px var(--neu-shadow-light);
+      --neu-in: inset 4px 4px 8px var(--neu-shadow-dark), inset -3px -3px 6px var(--neu-shadow-light);
 
       --t-fast: 160ms ease;
-      --t-snap: 240ms cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    [data-theme="dark"] {
-      --ink-900: #f1f5f9;
-      --ink-700: #cbd5e1;
-      --ink-600: #94a3b8;
-      --ink-500: #64748b;
-      --surface-0: #1a1a2e;
-      --surface-1: #1a1a2e;
-      --brand-700: #818cf8;
-      --brand-600: #a5b4fc;
-      --brand-500: #c4b5fd;
-      --focus-ring: var(--brand-500);
-      --shadow-panel: 0 18px 40px rgb(0 0 0 / 0.5);
-      --neu-out: 10px 10px 24px rgb(0 0 0 / 0.55), -6px -6px 18px rgb(255 255 255 / 0.03);
-      --neu-in: inset 4px 4px 8px rgb(0 0 0 / 0.5), inset -3px -3px 6px rgb(255 255 255 / 0.04);
-      --neu-soft: 6px 6px 14px rgb(0 0 0 / 0.55), -3px -3px 10px rgb(255 255 255 / 0.04);
     }
 
     /* ===== RESET & BASE ===== */
@@ -70,6 +83,11 @@
       padding: 0;
     }
 
+    html,
+    body {
+      height: 100%;
+    }
+
     body {
       font-family: 'Rubik', system-ui, sans-serif;
       color: var(--ink-900);
@@ -79,10 +97,16 @@
 
     button {
       font: inherit;
+      cursor: pointer;
     }
 
     ul {
       list-style: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
     }
 
     /* ===== A11Y HELPERS ===== */
@@ -122,26 +146,33 @@
       outline-offset: 2px;
     }
 
-    /* ===== APP SHELL & LAYOUT ===== */
-    .shell {
+    /* ===== APP SHELL ===== */
+    #root {
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .shell {
+      flex: 1;
       background: var(--surface-1);
       display: flex;
       flex-direction: column;
     }
 
-    .shell--inverted {
-      filter: invert(var(--inv, 0%)) hue-rotate(180deg);
-      transition: filter 0.3s ease;
-    }
-
     .page {
       flex: 1;
-      padding: 2.5rem 1.5rem;
+      padding: 2rem 1rem;
       max-width: 900px;
       width: 100%;
       margin: 0 auto;
       animation: fadeUp 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @media (min-width: 600px) {
+      .page {
+        padding: 2.5rem 1.5rem;
+      }
     }
 
     .page-title {
@@ -156,17 +187,16 @@
       margin-top: 0.25rem;
     }
 
-    /* ===== BUTTONS — primary stays explicit & high-contrast (research-backed) ===== */
+    /* ===== BUTTONS ===== */
     .btn {
       padding: 0.85rem 1.75rem;
       border: none;
       border-radius: 9999px;
-      cursor: pointer;
       font-size: 0.85rem;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      transition: transform var(--t-fast), box-shadow var(--t-fast), filter var(--t-fast);
+      transition: transform var(--t-fast), filter var(--t-fast);
     }
 
     .btn:hover:not(:disabled) {
@@ -185,7 +215,7 @@
     .btn--primary {
       background: linear-gradient(135deg, var(--brand-700), var(--brand-600));
       color: #fff;
-      box-shadow: var(--map-tap-shadow);
+      box-shadow: 0 8px 24px rgb(82 98 198 / 0.35);
     }
 
     .btn--primary:hover:not(:disabled) {
@@ -221,7 +251,7 @@
       font-weight: 600;
     }
 
-    /* ===== NEUMORPHIC CONTAINERS — research: container-only, never controls ===== */
+    /* ===== NEUMORPHIC CARDS ===== */
     .neu-card {
       background: var(--surface-1);
       border-radius: 20px;
@@ -229,20 +259,26 @@
       padding: 1.4rem 1.6rem;
     }
 
-    .neu-card--soft {
-      box-shadow: var(--neu-soft);
-      border-radius: 16px;
+    /* =====================================================================
+       TRACKER PAGE — stacking order
+       Info-wrap sits BETWEEN hero and map as a sibling (not inside hero).
+       z-index comparison is straightforward:
+         .info-wrap (z:50) > .hero (z:5) > .map-section (z:1)
+       This avoids nested stacking context traps entirely.
+    ===================================================================== */
+    .tracker {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      isolation: isolate;
     }
 
-    /* ===== TRACKER HERO — gradient brand strip with overlapping info card ===== */
-    /* Hero uses the official pattern-bg layered over the brand gradient.
-       Mobile asset (375px-tall pattern) below 600px, desktop asset above. */
     .hero {
       background:
         url("/images/pattern-bg-mobile.png") center / cover no-repeat,
         linear-gradient(180deg, var(--brand-700), var(--brand-600));
       text-align: center;
-      padding: 1.5rem 1.5rem 9rem;
+      padding: 1.25rem 1rem 5.5rem;
       position: relative;
       z-index: 5;
     }
@@ -252,6 +288,13 @@
         background:
           url("/images/pattern-bg-desktop.png") center / cover no-repeat,
           linear-gradient(180deg, var(--brand-700), var(--brand-600));
+        padding: 1.5rem 2rem 8rem;
+      }
+    }
+
+    @media (min-width: 900px) {
+      .hero {
+        padding: 2rem 2rem 9rem;
       }
     }
 
@@ -260,24 +303,25 @@
       justify-content: space-between;
       align-items: flex-start;
       max-width: 1110px;
-      margin: 0 auto 1rem;
-      gap: 1rem;
+      margin: 0 auto 0.75rem;
+      gap: 0.5rem;
       flex-wrap: wrap;
     }
 
     .hero__title {
       color: #fff;
-      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-size: clamp(1.5rem, 5vw, 2rem);
       font-weight: 500;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1rem;
     }
 
     .hero__status {
       color: #fff;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       min-height: 1.2em;
       opacity: 0.92;
-      margin-top: 0.75rem;
+      margin-top: 0.5rem;
+      padding: 0 0.5rem;
     }
 
     .hero__status--error {
@@ -285,44 +329,86 @@
       opacity: 1;
     }
 
+    /* On mobile, the track pill and theme card sit in a compact row */
+    @media (max-width: 599px) {
+      .hero__bar {
+        margin-bottom: 0.5rem;
+      }
+
+      .hero__bar>div {
+        width: min(220px, calc(100% - 7rem)) !important;
+      }
+
+      .theme-card {
+        padding: 0.55rem;
+        gap: 0.45rem;
+        border-radius: 12px;
+      }
+
+      .theme-row__label {
+        font-size: 0.65rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .slider {
+        height: 6px;
+      }
+    }
+
     /* ===== SEARCH FORM ===== */
     .search {
       max-width: 34rem;
       margin: 0 auto;
+      padding: 0 0.25rem;
+    }
+
+    @media (min-width: 600px) {
+      .search {
+        padding: 0 0.5rem;
+      }
     }
 
     .search__bar {
       display: flex;
-      border-radius: 9999px;
-      background: var(--surface-0);
-      box-shadow: var(--neu-in);
-      padding: 0.35rem;
-      gap: 0.35rem;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgb(0 0 0 / 0.15);
+      background: #fff;
     }
 
     .search__input {
       flex: 1;
-      padding: 0.85rem 1.5rem;
+      padding: 1rem 1.5rem;
       border: none;
       background: transparent;
       font: inherit;
-      font-size: 16px;
-      color: var(--ink-900);
+      font-size: 18px;
+      color: var(--ink-900-light);
       outline: none;
       min-width: 0;
     }
 
+    .search__input::placeholder {
+      color: var(--ink-500);
+    }
+
+    .search__input:focus {
+      box-shadow: inset 0 0 0 3px var(--focus-ring);
+    }
+
     .search__submit {
-      background: linear-gradient(135deg, var(--brand-500), var(--brand-600));
+      background: var(--ink-900-light);
       border: none;
-      padding: 0 1.4rem;
-      border-radius: 9999px;
+      padding: 0 1.5rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgb(82 98 198 / 0.4);
-      transition: filter var(--t-fast);
+      transition: background var(--t-fast);
+    }
+
+    .search__submit:hover:not(:disabled) {
+      background: hsl(0, 0%, 35%);
     }
 
     .search__submit:disabled {
@@ -330,20 +416,20 @@
       opacity: 0.7;
     }
 
-    .search__submit:hover:not(:disabled) {
-      filter: brightness(0.97);
+    .search__submit:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: -3px;
     }
 
     /* ===== TRACK PATH PILL ===== */
     .pill {
-      background: rgb(255 255 255 / 0.15);
+      background: rgb(255 255 255 / 0.18);
       backdrop-filter: blur(8px);
-      border: 1px solid rgb(255 255 255 / 0.25);
+      border: 1px solid rgb(255 255 255 / 0.3);
       color: #fff;
-      padding: 0.55rem 1.1rem;
+      padding: 0.5rem 0.95rem;
       border-radius: 9999px;
-      cursor: pointer;
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       font-weight: 600;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -354,30 +440,52 @@
       background: linear-gradient(135deg, var(--brand-500), var(--brand-600));
     }
 
-    /* ===== INFO CARDS — overlaps hero ↔ map boundary as stable landmark ===== */
+    /* =====================================================================
+       INFO CARDS — sibling element between hero and map
+       Uses negative margin to pull up into the hero's bottom padding,
+       creating the overlapping card effect from the FM design.
+       position:relative + z-index:50 means it sits in the same stacking
+       context as .map-section (z:1), so it's GUARANTEED to paint above
+       the map. No nested stacking context traps.
+    ===================================================================== */
     .info-wrap {
-      position: absolute;
-      left: 1rem;
-      right: 1rem;
-      bottom: 0;
-      transform: translateY(50%);
-      z-index: 1000;
+      position: relative;
+      z-index: 50;
+      margin-top: -3.5rem;
+      margin-bottom: -2rem;
+      padding: 0 1rem;
+    }
+
+    @media (min-width: 600px) {
+      .info-wrap {
+        margin-top: -4rem;
+        margin-bottom: -3rem;
+        padding: 0 1.5rem;
+      }
+    }
+
+    @media (min-width: 900px) {
+      .info-wrap {
+        margin-top: -4.5rem;
+        margin-bottom: -3.5rem;
+        padding: 0 2rem;
+      }
     }
 
     .info {
       display: grid;
       grid-template-columns: 1fr;
       background: var(--surface-0);
-      border-radius: 20px;
-      padding: 1.75rem 1.5rem;
-      box-shadow: var(--neu-out);
+      border-radius: 15px;
+      padding: 1.5rem 1rem;
+      box-shadow: 0 18px 40px rgb(43 43 43 / 0.16);
       max-width: 1110px;
       margin: 0 auto;
       text-align: center;
     }
 
     .info__cell {
-      padding: 0.7rem 0.5rem;
+      padding: 0.6rem 0.5rem;
     }
 
     .info__label {
@@ -390,7 +498,7 @@
     }
 
     .info__value {
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       font-weight: 500;
       color: var(--ink-900);
       word-break: break-word;
@@ -409,34 +517,64 @@
     @media (min-width: 600px) {
       .info {
         grid-template-columns: repeat(2, 1fr);
+        padding: 2rem 1.5rem;
+        gap: 0.5rem;
         text-align: left;
+      }
+
+      .info__cell {
+        padding: 0.5rem 1rem;
       }
     }
 
     @media (min-width: 900px) {
       .info {
         grid-template-columns: repeat(4, 1fr);
+        padding: 2.25rem 2rem;
+        gap: 0;
+      }
+
+      .info__cell {
+        padding: 0.5rem 2rem;
       }
 
       .info__cell:not(:last-child) {
-        border-right: 1px solid rgb(148 163 184 / 0.2);
+        border-right: 1px solid hsla(0, 0%, 59%, 0.3);
+      }
+
+      .info__label {
+        font-size: 0.7rem;
+        margin-bottom: 0.65rem;
+      }
+
+      .info__value {
+        font-size: 1.5rem;
       }
     }
 
-    /* ===== MAP ===== */
-    .map {
-      width: 100%;
-      height: 100%;
-      min-height: 400px;
-    }
-
+    /* ===== MAP — stays BELOW info-wrap in stacking order ===== */
     .map-section {
       flex: 1;
       position: relative;
-      min-height: 400px;
+      z-index: 1;
+      min-height: 300px;
     }
 
-    /* ===== LANDING PAGE — minimalist hero per research-backed CRO principles ===== */
+    @media (min-width: 600px) {
+      .map-section {
+        min-height: 400px;
+      }
+    }
+
+    .map {
+      width: 100%;
+      height: 100%;
+      min-height: inherit;
+    }
+
+    /* =====================================================================
+       LANDING PAGE — bold visible content in front of 3D background
+    ===================================================================== */
     .landing {
       flex: 1;
       position: relative;
@@ -444,14 +582,31 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      isolation: isolate;
     }
 
     .landing__corner {
       position: absolute;
-      top: 1.25rem;
-      right: 1.25rem;
-      width: min(280px, calc(100% - 2.5rem));
+      top: 0.75rem;
+      right: 0.75rem;
+      width: min(200px, calc(100% - 1.5rem));
       z-index: 10;
+    }
+
+    @media (min-width: 480px) {
+      .landing__corner {
+        width: min(240px, calc(100% - 2rem));
+        top: 1rem;
+        right: 1rem;
+      }
+    }
+
+    @media (min-width: 600px) {
+      .landing__corner {
+        top: 1.25rem;
+        right: 1.25rem;
+        width: min(280px, calc(100% - 2.5rem));
+      }
     }
 
     .landing__hero {
@@ -459,41 +614,65 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: clamp(2rem, 6vw, 5rem);
-      max-width: 800px;
+      padding: clamp(5rem, 12vw, 5.5rem) clamp(1.25rem, 4vw, 5rem) clamp(2rem, 4vw, 5rem);
+      max-width: 900px;
       position: relative;
       z-index: 5;
     }
 
+    .landing__eyebrow {
+      color: var(--brand-600);
+      font-size: clamp(0.7rem, 1.6vw, 0.85rem);
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
     .landing__h1 {
       color: var(--ink-900);
-      font-size: clamp(3rem, 11vw, 7rem);
+      font-size: clamp(2.5rem, 11vw, 7rem);
       font-weight: 700;
       line-height: 0.95;
       letter-spacing: -0.04em;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .landing__lead {
+      color: var(--ink-900);
+      font-size: clamp(1.05rem, 2.5vw, 1.5rem);
+      font-weight: 700;
+      line-height: 1.35;
+      max-width: 540px;
+      margin-bottom: 0.85rem;
     }
 
     .landing__sub {
-      color: var(--brand-600);
-      font-size: clamp(1rem, 2.2vw, 1.35rem);
-      font-weight: 500;
-      max-width: 520px;
+      color: var(--ink-700);
+      font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+      font-weight: 400;
       line-height: 1.55;
+      max-width: 520px;
       margin-bottom: 2rem;
     }
 
     .landing__ctas {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
+    }
+
+    @media (max-width: 480px) {
+      .landing__ctas .btn {
+        width: 100%;
+      }
     }
 
     .topo-bg {
       position: absolute;
       inset: 0;
-      z-index: 0;
-      opacity: 0.7;
+      z-index: -1;
+      opacity: 0.55;
       pointer-events: none;
     }
 
@@ -521,7 +700,6 @@
       font-weight: 600;
     }
 
-    /* Sliders share a single base + per-track gradient inline */
     .slider {
       width: 100%;
       height: 10px;
@@ -558,15 +736,15 @@
     /* ===== SAVED SEARCHES ===== */
     .saved-list {
       display: grid;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .saved-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
-      padding: 1.25rem 1.5rem;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
       background: var(--surface-1);
       border-radius: 16px;
       box-shadow: var(--neu-soft);
@@ -575,37 +753,55 @@
 
     .saved-item__main {
       flex: 1;
-      min-width: 200px;
+      min-width: 150px;
+    }
+
+    .saved-item__actions {
+      display: flex;
+      gap: 0.4rem;
     }
 
     .saved-item__ip {
       color: var(--ink-900);
       font-weight: 600;
-      font-size: 1rem;
-      margin-bottom: 0.2rem;
+      font-size: 0.95rem;
+      margin-bottom: 0.15rem;
     }
 
     .saved-item__loc {
       color: var(--ink-600);
-      font-size: 0.85rem;
+      font-size: 0.8rem;
     }
 
     .saved-item__time {
       color: var(--ink-600);
-      font-size: 0.75rem;
-      margin-top: 0.2rem;
+      font-size: 0.7rem;
+      margin-top: 0.15rem;
     }
 
     .saved-empty {
-      padding: 3.5rem 1rem;
+      padding: 3rem 1rem;
       text-align: center;
     }
 
     /* ===== ABOUT GRID ===== */
     .about-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.25rem;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    @media (min-width: 600px) {
+      .about-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+      }
+    }
+
+    @media (min-width: 900px) {
+      .about-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
 
     .about-card {
@@ -628,7 +824,7 @@
       color: var(--ink-600);
     }
 
-    /* ===== SITEMAP — small, non-distracting per request ===== */
+    /* ===== SITEMAP ===== */
     .sitemap {
       padding: 0.7rem 1rem;
       text-align: center;
@@ -676,17 +872,7 @@
       transition: background-color 0.3s ease;
     }
 
-    /* ===== ANIMATIONS — composited (transform + opacity only) per browser perf guidance ===== */
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
-    }
-
+    /* ===== ANIMATIONS ===== */
     @keyframes fadeUp {
       from {
         opacity: 0;
