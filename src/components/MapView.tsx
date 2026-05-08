@@ -48,3 +48,53 @@ function MapView({ data, isDark, showTrackPath, history }: Props) {
         markerRef.current = L.marker([0, 0], { icon, alt: "IP location", title: "IP location" }).addTo(map);
         mapRef.current = map;
 
+        return () => {
+            map.remove();
+            mapRef.current = null;
+            tilesRef.current = null;
+            markerRef.current = null;
+            pathRef.current = null;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Swap tile layer on theme change (no remount)
+    useEffect(() => {
+        if (!mapRef.current || !tilesRef.current) return;
+        mapRef.current.removeLayer(tilesRef.current);
+        tilesRef.current = L.tileLayer(isDark ? DARK_TILES : LIGHT_TILES, TILE_OPTS).addTo(mapRef.current);
+    }, [isDark]);
+
+    // Move marker + flyTo new location — short purposeful motion (research-backed)
+    useEffect(() => {
+        if (!data || !mapRef.current) return;
+        const { lat, lng } = data.location;
+        mapRef.current.flyTo([lat, lng], 13, { animate: true, duration: 0.35, easeLinearity: 0.25 });
+        markerRef.current.setLatLng([lat, lng]);
+    }, [data]);
+
+    // Track path — dotted blue polyline through every history point
+    useEffect(() => {
+        if (!mapRef.current) return;
+        if (pathRef.current) {
+            mapRef.current.removeLayer(pathRef.current);
+            pathRef.current = null;
+        }
+        if (!showTrackPath || history.length < 1) return;
+        const points = [...history].reverse().map((h) => [h.lat, h.lng] as [number, number]);
+        pathRef.current = L.polyline(points, {
+            color: "#5262c6", weight: 3, opacity: 0.85, dashArray: "8, 10",
+        }).addTo(mapRef.current);
+    }, [showTrackPath, history]);
+
+    return (
+        <div
+            id="leaflet-map"
+            className="map"
+            role="application"
+            aria-label="Map showing IP address location"
+        />
+    );
+}
+
+export default MapView;
