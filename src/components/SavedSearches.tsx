@@ -44,7 +44,7 @@ function SavedSearches({ history, onRemove, onClear, onRevisit, onNavigate }: Pr
                                 </p>
                                 <p className="saved-item__time">{new Date(item.timestamp).toLocaleString()}</p>
                             </div>
-                            <div style={{ display: "flex", gap: "0.5rem" }}>
+                            <div className="saved-item__actions">
                                 <button className="btn--sm-primary" onClick={() => onRevisit(item)} aria-label={`Revisit ${item.ip} on map`}>
                                     View
                                 </button>
