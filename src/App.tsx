@@ -1,12 +1,10 @@
-// App.tsx — root component with multi-page routing
+// App.tsx — root with multi-page routing and global theme overlays
 //
-// State lifting:
-//   • Theme is set on documentElement via data-theme="dark" so CSS variables
-//     flip in one place — no per-component theme prop drilling for styling.
-//   • History is shared across Tracker (writes) and SavedSearches (reads).
-//   • Inversion is applied as a single root-level CSS filter that cascades.
-//   • Night mode overlay is a fixed div with pointer-events: none — never
-//     blocks input.
+// Theme model:
+//   theme.mode is a number 0-100. We write it as a CSS variable --mode
+//   on the document root. Every color token in index.html is computed via
+//   color-mix() weighted by --mode, so dragging the slider produces a
+//   smooth, continuous gradient transition between light and dark.
 
 import { useState, useEffect } from "react";
 import type { Page, IPData, HistoryItem } from "./types";
@@ -21,11 +19,12 @@ import Sitemap from "./components/Sitemap";
 function App() {
   const [page, setPage] = useState<Page>("landing");
   const [revisitData, setRevisitData] = useState<IPData | null>(null);
-  const { theme, toggleMode, setInversion, setBlueLight } = useTheme();
+  const { theme, setMode, setInversion, setBlueLight } = useTheme();
   const { history, add, remove, clear } = useSearchHistory();
 
+  // Push --mode to documentElement so every CSS color-mix() picks it up
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme.mode);
+    document.documentElement.style.setProperty("--mode", `${theme.mode}%`);
   }, [theme.mode]);
 
   const handleRevisit = (item: HistoryItem) => {
@@ -52,7 +51,7 @@ function App() {
         {page === "landing" && (
           <LandingPage
             theme={theme}
-            onToggleMode={toggleMode}
+            onSetMode={setMode}
             onInversion={setInversion}
             onBlueLight={setBlueLight}
             onNavigate={handleNavigate}
@@ -61,7 +60,7 @@ function App() {
         {page === "tracker" && (
           <TrackerPage
             theme={theme}
-            onToggleMode={toggleMode}
+            onSetMode={setMode}
             onInversion={setInversion}
             onBlueLight={setBlueLight}
             history={history}
@@ -77,8 +76,8 @@ function App() {
         <Sitemap current={page} onNavigate={handleNavigate} />
       </div>
 
-      {/* Night overlay sits OUTSIDE the inverted shell so the warm amber
-          tint stays warm even when inversion is also on. */}
+      {/* Night overlay sits OUTSIDE the inverted shell so the warm amber tint
+          stays warm even when inversion is also on. */}
       {theme.blueLight > 0 && (
         <div
           className="night-overlay"
