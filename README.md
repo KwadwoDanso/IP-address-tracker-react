@@ -389,7 +389,7 @@ If I had more time I would add unit tests for the hooks, integration tests for t
 ## Author
 
 - Kwadwo Danso
-- GitHub: [KwadwoDanso](https://github.com/KwadwoDanso)
+- GitHub: [KwadwoDanso](https://github.com/KwadwoDanso/IP-address-tracker-react)
 - Frontend Mentor: [@KwadwoDanso](https://www.frontendmentor.io/profile/KwadwoDanso)
 
 ## Acknowledgments
@@ -397,6 +397,7 @@ If I had more time I would add unit tests for the hooks, integration tests for t
 - [Frontend Mentor](https://www.frontendmentor.io/challenges/ip-address-tracker-I8-0yYAH0) for the original challenge
 - [Geo.ipify](https://geo.ipify.org/) for the IP geolocation API
 - [LeafletJS](https://leafletjs.com/) for the map library
+- Utilize AI to learn the new libraries and implementing it
 - [OpenStreetMap](https://www.openstreetmap.org/) and [CartoDB](https://carto.com/) for tile imagery
 - [Three.js](https://threejs.org/) for the WebGL 3D library
 - [GSAP](https://gsap.com/) for the animation library
