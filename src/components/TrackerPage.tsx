@@ -6,12 +6,11 @@
 //   • AbortController cancels any in-flight fetch when a new submit lands
 //
 // Stacking strategy (fixes info card hidden behind map):
-//   • .tracker wrapper sets `isolation: isolate` so its children stack
-//     within their own context.
-//   • .hero is z-index:5, .map-section is z-index:1.
-//   • .info-wrap is absolutely positioned inside .hero with z-index:10,
-//     so it sits above the hero AND visibly above the map — info card
-//     stays in front no matter what Leaflet's internal panes do.
+//   • .tracker wrapper uses isolation:isolate for a single stacking context.
+//   • .info-wrap is a SIBLING of hero and map (not inside hero).
+//   • z-index order: .info-wrap (50) > .hero (5) > .map-section (1)
+//   • Negative margins on .info-wrap create the visual overlap:
+//     margin-top pulls it up into the hero, margin-bottom pulls the map up behind it.
 
 import { useState, useEffect, useRef, useTransition, useOptimistic } from "react";
 import type { FormEvent, ChangeEvent } from "react";
@@ -137,25 +136,33 @@ function TrackerPage({ theme, onSetMode, onInversion, onBlueLight, history, onAd
                 >
                     {status}
                 </p>
-
-                <div className="info-wrap">
-                    <dl className="info" aria-label="IP address details">
-                        {cards.map((c) => (
-                            <div key={c.label} className="info__cell">
-                                <dt className="info__label">
-                                    {c.label}
-                                    {c.toggle && (
-                                        <button className="info__toggle" onClick={toggle} aria-label={visible ? "Hide IP address" : "Show IP address"}>
-                                            {visible ? "Hide" : "Show"}
-                                        </button>
-                                    )}
-                                </dt>
-                                <dd className="info__value">{c.value}</dd>
-                            </div>
-                        ))}
-                    </dl>
-                </div>
             </header>
+
+            {/* Info card sits BETWEEN hero and map as a sibling — not inside
+          the hero's stacking context. This is the fix: when info-wrap
+          was inside hero, hero's stacking context (position:relative +
+          z-index:5) contained it. Even with translateY(50%) extending
+          it visually over the map, Leaflet's panes could paint on top.
+          As a sibling with its own position:relative + z-index:50,
+          info-wrap is guaranteed to sit above map-section at z-index:1
+          within the same parent stacking context (.tracker). */}
+            <div className="info-wrap">
+                <dl className="info" aria-label="IP address details">
+                    {cards.map((c) => (
+                        <div key={c.label} className="info__cell">
+                            <dt className="info__label">
+                                {c.label}
+                                {c.toggle && (
+                                    <button className="info__toggle" onClick={toggle} aria-label={visible ? "Hide IP address" : "Show IP address"}>
+                                        {visible ? "Hide" : "Show"}
+                                    </button>
+                                )}
+                            </dt>
+                            <dd className="info__value">{c.value}</dd>
+                        </div>
+                    ))}
+                </dl>
+            </div>
 
             <section className="map-section" aria-label="Map">
                 <MapView data={data} isDark={isDark} showTrackPath={showTrackPath} history={history} />
