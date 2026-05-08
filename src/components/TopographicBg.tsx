@@ -72,3 +72,38 @@ function TopographicBg({ isDark }: Props) {
             renderer.render(scene, camera);
             rafId = requestAnimationFrame(animate);
         };
+
+
+        if (reduced) renderer.render(scene, camera);
+        else animate();
+
+        const onResize = () => {
+            if (!ref.current) return;
+            const w = ref.current.clientWidth, h = ref.current.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        };
+        window.addEventListener("resize", onResize);
+
+        return () => {
+            cancelAnimationFrame(rafId);
+            window.removeEventListener("resize", onResize);
+            top.geo.dispose(); top.mat.dispose();
+            bottom.geo.dispose(); bottom.mat.dispose();
+            renderer.dispose();
+            if (renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
+        };
+    }, []);
+
+    // Theme-aware color update — no scene rebuild
+    useEffect(() => {
+        if (!meshesRef.current) return;
+        meshesRef.current.top.mat.color.setHex(isDark ? 0xa78bfa : 0x6366f1);
+        meshesRef.current.bottom.mat.color.setHex(isDark ? 0x818cf8 : 0x4f46e5);
+    }, [isDark]);
+
+    return <div ref={ref} className="topo-bg" aria-hidden="true" />;
+}
+
+export default TopographicBg;
