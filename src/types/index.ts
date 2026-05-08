@@ -7,7 +7,7 @@ export interface IPData {
 }
 
 export interface ThemeState {
-    mode: "light" | "dark";
+    mode: number; // 0 = light, 100 = dark, intermediate values blend smoothly
     inversion: number;
     blueLight: number;
 }
