@@ -1,4 +1,4 @@
-/ useSearchHistory.ts — saved searches persisted to localStorage
+// useSearchHistory.ts — saved searches persisted to localStorage
 
 import { useState, useEffect, useCallback } from "react";
 import type { HistoryItem, IPData } from "../types";
@@ -18,6 +18,7 @@ function useSearchHistory() {
     useEffect(() => {
         localStorage.setItem(KEY, JSON.stringify(history));
     }, [history]);
+
     const add = useCallback((d: IPData) => {
         setHistory((prev) => {
             if (prev[0]?.ip === d.ip) return prev;
